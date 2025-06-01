@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bin Feeding Material Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-image: url('Picture.jpeg'); /* Ensure this image is accessible or remove/replace */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.7); 
+            z-index: -1; 
+        }
+
+        .table-cell {
+            padding: 0.75rem; 
+            text-align: left;
+            border-bottom-width: 1px;
+            border-color: #e5e7eb; 
+            vertical-align: middle;
+        }
+        .header-cell {
+            background-color: #f3f4f6; 
+            font-weight: 600; 
+            color: #374151; 
+        }
+        .table-cell input[type="number"] {
+            width: 80px; 
+            padding: 0.3rem 0.5rem; 
+            border-radius: 0.375rem; 
+            border: 1px solid #d1d5db; 
+            text-align: center;
+            font-size: 0.875rem; 
+        }
+        .table-cell input[type="text"] {
+            width: 100%;
+            padding: 0.3rem 0.5rem;
+            border-radius: 0.375rem;
+            border: 1px solid #d1d5db;
+            font-size: 0.875rem; 
+        }
+        #batchesTakenInput {
+            width: 90px; 
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem; 
+            font-weight: 500; 
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap; 
+        }
+        .btn-primary {
+            background-color: #3b82f6; 
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; 
+        }
+        .btn-secondary {
+            background-color: #6b7280; 
+            color: white;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        .btn-secondary:hover {
+            background-color: #4b5563; 
+        }
+        .btn-upload { 
+            background-color: #10b981; 
+            color: white;
+        }
+        .btn-upload:hover {
+            background-color: #059669; 
+        }
+        .btn-download {
+            background-color: #10b981; 
+            color: white;
+        }
+        .btn-download:hover {
+            background-color: #059669; 
+        }
+
+        .summary-card {
+            background-color: #f9fafb; 
+            padding: 1rem;
+            border-radius: 0.5rem; 
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); 
+        }
+        .low-stock-alert-medium {
+            background-color: #fffbe6 !important; 
+            border-left: 4px solid #f59e0b; 
+        }
+        .low-stock-alert-critical {
+            background-color: #fee2e2 !important; 
+            border-left: 4px solid #ef4444; 
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; transform: translateY(20px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeInOut {
+            animation: fadeInOut 3s ease-in-out forwards;
+        }
+        .download-options-container {
+            position: relative; 
+            display: inline-block; 
+        }
+        .download-options { 
+            position: absolute;
+            top: 100%; 
+            left: 0;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            z-index: 10;
+            min-width: 160px;
+        }
+        .download-options button {
+            display: block;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            text-align: left;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            color: #374151;
+            transition: background-color 0.2s;
+        }
+        .download-options button:hover {
+            background-color: #f3f4f6;
+        }
+        .modal {
+            position: fixed;
+            z-index: 1000; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .modal-content input[type="text"],
+        .modal-content input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .modal-content button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .modal-content button:hover {
+            background-color: #2563eb;
+        }
+        .modal-message {
+            color: red;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <script type="text/javascript" src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.autotable.min.js"></script>
+
+    <div class="container mx-auto max-w-7xl bg-white p-4 sm:p-6 md:p-8 rounded-lg shadow-xl">
+        <header class="mb-6 text-center">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">Bin Feeding Material Dashboard</h1>
+            <p class="text-md text-gray-600">Formulation: 10000MG</p>
+        </header>
+
+        <div class="mb-6 p-4 bg-blue-50 rounded-lg shadow-sm flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+            <h2 class="text-xl font-semibold text-blue-800">Batches Taken:</h2>
+            <div class="flex items-center space-x-2">
+                <button class="btn btn-secondary" onclick="updateBatchesTaken(-1)">-</button>
+                <input type="number" min="0" value="0" id="batchesTakenInput"
+                       class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block sm:text-sm border-gray-300 rounded-md"
+                       oninput="handleBatchesTakenInput(this.value)">
+                <button class="btn btn-secondary" onclick="updateBatchesTaken(1)">+</button>
+            </div>
+            <p class="text-sm text-gray-600">(This consumes stock and affects overall batches)</p>
+        </div>
+
+        <div class="mb-6 text-center flex flex-col sm:flex-row flex-wrap justify-center items-center space-y-4 sm:space-y-0 sm:space-x-0 md:space-x-4">
+            <button id="saveDataBtn" class="btn btn-primary px-8 py-3 text-lg mb-2 sm:mb-0">Save Data</button>
+            
+            <div class="download-options-container mb-2 sm:mb-0">
+                <button id="showDownloadChoicesBtn" class="btn btn-download px-8 py-3 text-lg" onclick="toggleActualDownloadOptions()">
+                    Download Data
+                </button>
+                <div id="actualDownloadOptions" class="download-options hidden">
+                    <button onclick="initiateDownloadWithAuth('excel')">Download as Excel</button>
+                    <button onclick="initiateDownloadWithAuth('pdf')">Download as PDF</button>
+                </div>
+            </div>
+
+            <div class="mb-2 sm:mb-0">
+                <label for="uploadExcelInput" class="btn btn-upload px-8 py-3 text-lg cursor-pointer">
+                    Upload & Update
+                </label>
+                <input type="file" id="uploadExcelInput" accept=".xlsx, .xls" class="hidden">
+            </div>
+        </div>
+         <p class="text-sm text-gray-600 text-center mt-2">
+            Upload an Excel file (headers: "Bin Material", "Current Stock (KG)", "KG per Batch") to update. <br>
+            User ID for saved data: <span id="displayUserId" class="font-mono text-xs text-gray-500">Loading...</span>
+        </p>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="table-cell header-cell">Sr.No.</th>
+                        <th class="table-cell header-cell w-1/6">Bin Material</th>
+                        <th class="table-cell header-cell">Current Stock (KG)</th>
+                        <th class="table-cell header-cell">KG per Batch</th>
+                        <th class="table-cell header-cell">No. of Bags</th>
+                        <th class="table-cell header-cell">Weight/Bag (KG)</th>
+                        <th class="table-cell header-cell">Total Dump (KG)</th>
+                        <th class="table-cell header-cell">Updated Stock (Preview KG)</th>
+                        <th class="table-cell header-cell">Batches Possible</th>
+                        <th class="table-cell header-cell">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="materialTableBody" class="bg-white divide-y divide-gray-200">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="mt-8 p-4 sm:p-6 summary-card">
+            <h2 class="text-xl font-semibold text-gray-700 mb-2">Overall Summary</h2>
+            <p class="text-lg text-gray-600">
+                Total Batches Possible (based on limiting material):
+                <span id="overallBatches" class="font-bold text-blue-600"></span>
+            </p>
+        </div>
+
+        <div id="messageBox" class="fixed bottom-5 right-5 p-3 rounded-lg shadow-md hidden animate-fadeInOut z-50">
+            <p id="messageText"></p>
+        </div>
+    </div>
+
+    <div id="downloadAuthModal" class="modal hidden">
+        <div class="modal-content">
+            <h2 class="text-xl font-semibold mb-4">Download Authentication</h2>
+            <input type="text" id="authUserId" placeholder="User ID">
+            <input type="password" id="authPassword" placeholder="Password">
+            <p id="authMessage" class="modal-message"></p>
+            <button onclick="authenticateDownload()">Login</button>
+        </div>
+    </div>
+
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase instances and user ID
+        window.app = null;
+        window.db = null;
+        window.auth = null;
+        window.userId = null;
+        
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyASgl1lGaT1_vQvs0ERAN2BpOfzDrCius4",
+          authDomain: "bin-feeding-dashboard.firebaseapp.com",
+          projectId: "bin-feeding-dashboard",
+          storageBucket: "bin-feeding-dashboard.firebasestorage.app",
+          messagingSenderId: "643313947630",
+          appId: "1:643313947630:web:f195bfa5bea705c7e6f4ff"
+        };
+
+        // Initialize Firebase
+        try {
+            window.app = initializeApp(firebaseConfig);
+            window.db = getFirestore(window.app);
+            window.auth = getAuth(window.app);
+
+            // Authentication state listener
+            onAuthStateChanged(window.auth, async (user) => {
+                if (user) {
+                    window.userId = user.uid;
+                    console.log("Authenticated with user ID:", window.userId);
+                    if (document.getElementById('displayUserId')) {
+                         document.getElementById('displayUserId').textContent = window.userId + (user.isAnonymous ? " (Anonymous)" : "");
+                    }
+                    // Ensure loadData is defined before calling
+                    if (typeof window.loadData === 'function') {
+                        await window.loadData(); 
+                    } else {
+                        console.warn("window.loadData is not defined at the time of auth state change.");
+                        if (typeof window.renderTable === 'function') {
+                            window.renderTable(); // Fallback to render with default if loadData is missing
+                        }
+                    }
+                } else {
+                    // Attempt anonymous sign-in if no user
+                    try {
+                        const anonymousUserCredential = await signInAnonymously(window.auth);
+                        window.userId = anonymousUserCredential.user.uid;
+                        console.log("Signed in anonymously with user ID:", window.userId);
+                        if (document.getElementById('displayUserId')) {
+                             document.getElementById('displayUserId').textContent = window.userId + " (Anonymous)";
+                        }
+                        // Ensure loadData is defined before calling
+                        if (typeof window.loadData === 'function') {
+                            await window.loadData(); 
+                        } else {
+                            console.warn("window.loadData is not defined for anonymous user setup.");
+                             if (typeof window.renderTable === 'function') {
+                                window.renderTable(); 
+                            }
+                        }
+                    } catch (error) {
+                        console.error("Error signing in anonymously:", error);
+                        if (typeof window.showMessage === 'function') {
+                            window.showMessage("Authentication failed. Data persistence may not work.", 'error');
+                        }
+                        if (document.getElementById('displayUserId')) {
+                             document.getElementById('displayUserId').textContent = "Offline - Auth Error";
+                        }
+                        if (typeof window.renderTable === 'function') {
+                            window.renderTable(); 
+                        }
+                    }
+                }
+            });
+
+        } catch (initError) {
+            console.error("Firebase initialization error:", initError);
+            if (typeof window.showMessage === 'function') {
+                window.showMessage("Firebase setup error. Running in offline mode.", 'error');
+            }
+             if (document.getElementById('displayUserId')) {
+                document.getElementById('displayUserId').textContent = "Offline - Init Error";
+             }
+            document.addEventListener('DOMContentLoaded', () => {
+                if (typeof window.renderTable === 'function') {
+                    window.renderTable();
+                }
+            });
+        }
+    </script>
+
+    <script type="module">
+        let requestedDownloadFormat = null; // Stores 'excel' or 'pdf' for authenticated download
+
+        // Default initial material data (used if no data from Firestore or if offline)
+        let materials = [
+            { id: 1, name: "Maize", currentStock: 10000, kgPerBatch: 60, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 2, name: "Rice Polish", currentStock: 10000, kgPerBatch: 100.25, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 3, name: "Rapseed", currentStock: 10000, kgPerBatch: 81.50, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 4, name: "Rice DDGS", currentStock: 10000, kgPerBatch: 140, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 5, name: "Wheat Bran", currentStock: 10, kgPerBatch: 0, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 6, name: "Sal Seed", currentStock: 10000, kgPerBatch: 40.75, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 7, name: "DORB", currentStock: -50, kgPerBatch: 25, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 8, name: "CGF", currentStock: 10000, kgPerBatch: 400, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 9, name: "Broken Rice", currentStock: 10000, kgPerBatch: 35.5, numberOfBagsToDump: 0, weightPerBagInput: 50 },
+            { id: 10, name: "DORB 1", currentStock: 7500, kgPerBatch: 55, numberOfBagsToDump: 0, weightPerBagInput: 50 }
+        ];
+
+        // Ensure data types are correct for initial materials
+        materials.forEach(m => {
+            m.currentStock = parseFloat(m.currentStock) || 0;
+            m.kgPerBatch = parseFloat(m.kgPerBatch) || 0;
+            m.numberOfBagsToDump = parseInt(m.numberOfBagsToDump) || 0;
+            m.weightPerBagInput = parseInt(m.weightPerBagInput) || 0;
+        });
+
+        let batchesTaken = 0; // Overall batches taken
+
+        // DOM Element References
+        const tableBody = document.getElementById('materialTableBody');
+        const overallBatchesEl = document.getElementById('overallBatches');
+        const batchesTakenInput = document.getElementById('batchesTakenInput');
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+        const saveDataBtn = document.getElementById('saveDataBtn');
+        const displayUserIdEl = document.getElementById('displayUserId'); // Already referenced in Firebase script
+        const downloadAuthModal = document.getElementById('downloadAuthModal');
+        const authUserIdInput = document.getElementById('authUserId');
+        const authPasswordInput = document.getElementById('authPassword');
+        const authMessageEl = document.getElementById('authMessage');
+        const uploadExcelInput = document.getElementById('uploadExcelInput');
+
+        // --- Notification Message Function ---
+        window.showMessage = function(message, type = 'info', duration = 3000) {
+            if (!messageText || !messageBox) {
+                console.warn("showMessage called before UI elements are ready or they are missing.");
+                return;
+            }
+            messageText.textContent = message;
+            // Reset classes for animation and color
+            messageBox.className = 'fixed bottom-5 right-5 p-3 rounded-lg shadow-md z-50'; // Base classes
+            void messageBox.offsetWidth; // Trigger reflow for animation restart
+            messageBox.classList.add('animate-fadeInOut');
+
+            if (type === 'error') {
+                messageBox.classList.add('bg-red-500', 'text-white');
+            } else if (type === 'success') {
+                messageBox.classList.add('bg-green-500', 'text-white');
+            } else if (type === 'warning') {
+                 messageBox.classList.add('bg-yellow-400', 'text-black'); // Distinct warning style
+            }else { // 'info'
+                messageBox.classList.add('bg-blue-600', 'text-white');
+            }
+            messageBox.classList.remove('hidden'); // Make visible
+            
+            // Clear previous timeout if any
+            if (messageBox.timeoutId) {
+                clearTimeout(messageBox.timeoutId);
+            }
+            // Hide message after duration
+            messageBox.timeoutId = setTimeout(() => {
+                messageBox.classList.add('hidden');
+            }, duration);
+        };
+
+        // --- Firestore Data Operations ---
+        window.saveData = async function() {
+            if (!window.userId || !window.db || !window.app) {
+                window.showMessage("Offline Mode or Firebase not fully initialized. Cannot save to cloud.", 'warning', 4000);
+                return;
+            }
+            // Use the actual projectId from the config
+            const currentProjectId = window.app.options.projectId; 
+            if (!currentProjectId) {
+                window.showMessage("Project ID not found in Firebase config. Cannot save.", 'error', 4000);
+                return;
+            }
+
+            try {
+                const docRef = doc(window.db, "artifacts", currentProjectId, "users", window.userId, "materialDashboard");
+                const dataToSave = {
+                    materials: materials.map(m => ({ ...m })), 
+                    batchesTaken: batchesTaken,
+                    timestamp: new Date().toISOString() 
+                };
+                await setDoc(docRef, dataToSave);
+                window.showMessage("Data saved successfully to cloud!", 'success');
+            } catch (e) {
+                console.error("Error saving document: ", e);
+                window.showMessage("Error saving data to cloud. Please try again.", 'error');
+            }
+        };
+
+        window.loadData = async function() {
+            if (!window.userId || !window.db || !window.app) {
+                console.warn("Offline Mode or Firebase not fully initialized for loading data.");
+                window.renderTable(); 
+                return;
+            }
+            const currentProjectId = window.app.options.projectId;
+            if (!currentProjectId) {
+                console.error("Project ID not found in Firebase config for loading data.");
+                window.renderTable();
+                return;
+            }
+
+            const docRef = doc(window.db, "artifacts", currentProjectId, "users", window.userId, "materialDashboard");
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const loadedData = docSnap.data();
+                    materials = loadedData.materials || materials; 
+                    batchesTaken = loadedData.batchesTaken || 0;   
+
+                    materials.forEach(m => {
+                        m.currentStock = parseFloat(m.currentStock) || 0;
+                        m.kgPerBatch = parseFloat(m.kgPerBatch) || 0;
+                        m.numberOfBagsToDump = parseInt(m.numberOfBagsToDump) || 0;
+                        m.weightPerBagInput = parseInt(m.weightPerBagInput) || 0;
+                        if (m.id === undefined) m.id = materials.indexOf(m) + 1; 
+                    });
+                    // Removed real-time message to avoid spamming on every minor update from other clients (if any)
+                    // window.showMessage("Data loaded/updated in real-time from cloud!", 'info'); 
+                    console.log("Data loaded/updated from Firestore.");
+                } else {
+                    console.log("No existing data in cloud. Saving current local/default data to cloud.");
+                    window.saveData(); 
+                }
+                window.renderTable(); 
+            }, (error) => {
+                console.error("Error listening to document for real-time updates: ", error);
+                window.showMessage("Error loading real-time data. Using local/default values.", 'error');
+                window.renderTable(); 
+            });
+        };
+
+        // --- Table Rendering and Material Property Updates ---
+        window.handleMaterialPropertyChange = function(materialId, propertyName, rawValue, inputElement) {
+            const material = materials.find(m => m.id === materialId);
+            if (!material) return;
+
+            let processedValue;
+            let isValid = true;
+
+            if (propertyName === 'name') {
+                material.name = String(rawValue).trim();
+            } else if (propertyName === 'kgPerBatch') {
+                processedValue = (String(rawValue).trim() === "") ? 0 : parseFloat(rawValue);
+                if (isNaN(processedValue) || processedValue < 0) {
+                    window.showMessage(`Invalid KG per Batch. Must be a non-negative number.`, 'error', 2500);
+                    if (inputElement) inputElement.value = parseFloat(material.kgPerBatch).toFixed(2);
+                    isValid = false;
+                } else {
+                    material.kgPerBatch = processedValue;
+                    if (inputElement && inputElement.value !== parseFloat(material.kgPerBatch).toFixed(2)) {
+                        inputElement.value = parseFloat(material.kgPerBatch).toFixed(2);
+                    }
+                }
+            } else { 
+                processedValue = (String(rawValue).trim() === "") ? 0 : parseFloat(rawValue);
+                
+                let specificInvalidCondition = false;
+                let message = "";
+
+                if (propertyName === 'currentStock') {
+                    if (isNaN(processedValue)) {
+                        message = `Invalid ${propertyName}. Must be a number.`;
+                        specificInvalidCondition = true;
+                    }
+                } else if (propertyName === 'numberOfBagsToDump') {
+                     if (isNaN(processedValue)) { // Allow negative for numberOfBagsToDump
+                        message = `Invalid ${propertyName}. Must be a number.`;
+                        specificInvalidCondition = true;
+                    }
+                } else if (propertyName === 'weightPerBagInput') {
+                    if (isNaN(processedValue) || processedValue < 0) {
+                        message = `Invalid ${propertyName}. Must be a non-negative number.`;
+                        specificInvalidCondition = true;
+                    }
+                }
+
+
+                if (specificInvalidCondition) {
+                    window.showMessage(message, 'error', 2500);
+                    if (inputElement) inputElement.value = (propertyName === 'currentStock' || propertyName === 'numberOfBagsToDump') ? material[propertyName] : Math.floor(material[propertyName]);
+                    isValid = false;
+                } else if (isValid) { 
+                    const valueToStore = (propertyName === 'currentStock' || propertyName === 'numberOfBagsToDump') ? processedValue : Math.floor(processedValue);
+                    material[propertyName] = valueToStore;
+                    if (inputElement && parseFloat(inputElement.value) !== valueToStore ) { 
+                        inputElement.value = valueToStore;
+                    }
+                }
+            }
+
+            if (isValid) {
+                window.renderTable(); 
+                window.saveData(); 
+            }
+        };
+
+        window.renderTable = function() {
+            if (!tableBody) return; 
+            tableBody.innerHTML = ''; 
+
+            materials.forEach((material, index) => {
+                const actualCurrentStock = parseFloat(material.currentStock); 
+                const materialKgPerBatchValue = parseFloat(material.kgPerBatch);
+                const materialKgPerBatchDisplay = materialKgPerBatchValue.toFixed(2); 
+
+                const materialWeightPerBagInput = parseInt(material.weightPerBagInput);
+                const materialNumberOfBagsToDump = parseInt(material.numberOfBagsToDump); 
+
+                const totalWeightToDumpPreview = materialNumberOfBagsToDump * materialWeightPerBagInput;
+                const updatedStockPreview = actualCurrentStock + totalWeightToDumpPreview;
+
+                let individualMaterialBatchesPossible = 0;
+                let batchesPossibleDisplayText = '0';
+
+                if (materialKgPerBatchValue > 0) {
+                    individualMaterialBatchesPossible = Math.floor(updatedStockPreview / materialKgPerBatchValue);
+                    batchesPossibleDisplayText = individualMaterialBatchesPossible.toLocaleString();
+                } else { 
+                    batchesPossibleDisplayText = (updatedStockPreview !== 0 && materialKgPerBatchValue === 0) ? 'N/A (0 KG/Batch)' : '0';
+                }
+
+                let rowHighlightClass = '';
+                if (materialKgPerBatchValue > 0 && individualMaterialBatchesPossible > 0) { // Only highlight for positive batches
+                    if (individualMaterialBatchesPossible <= 15) {
+                        rowHighlightClass = 'low-stock-alert-critical';
+                    } else if (individualMaterialBatchesPossible <= 20) {
+                        rowHighlightClass = 'low-stock-alert-medium';
+                    }
+                }
+
+                let batchesPossibleTextColorClass = 'text-gray-500'; 
+                if (materialKgPerBatchValue > 0) { 
+                    if (individualMaterialBatchesPossible <= 0) {
+                        batchesPossibleTextColorClass = 'text-red-600';
+                    } else { 
+                        batchesPossibleTextColorClass = 'text-green-600';
+                    }
+                }
+
+                const row = tableBody.insertRow();
+                let baseRowBg = index % 2 === 0 ? 'bg-white' : 'bg-gray-50'; 
+                row.className = `${rowHighlightClass || baseRowBg}`; 
+
+                row.innerHTML = `
+                    <td class="table-cell">${material.id}</td>
+                    <td class="table-cell">
+                        <input type="text" value="${material.name}"
+                               class="focus:ring-blue-500 focus:border-blue-500"
+                               onchange="handleMaterialPropertyChange(${material.id}, 'name', this.value, this)">
+                    </td>
+                    <td class="table-cell">
+                        <input type="number" value="${actualCurrentStock.toFixed(2)}" 
+                               class="focus:ring-blue-500 focus:border-blue-500"
+                               onchange="handleMaterialPropertyChange(${material.id}, 'currentStock', this.value, this)">
+                    </td>
+                    <td class="table-cell">
+                        <input type="number" step="0.01" min="0" value="${materialKgPerBatchDisplay}"
+                               class="focus:ring-blue-500 focus:border-blue-500"
+                               onchange="handleMaterialPropertyChange(${material.id}, 'kgPerBatch', this.value, this)">
+                    </td>
+                    <td class="table-cell">
+                        <input type="number" value="${materialNumberOfBagsToDump}" class="bags-input shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                               data-id="${material.id}"
+                               oninput="updateMaterialPreview(${material.id}, 'bags', this.value, this)">
+                    </td>
+                    <td class="table-cell">
+                        <input type="number" min="0" value="${materialWeightPerBagInput}" class="weight-input shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                               data-id="${material.id}"
+                               oninput="updateMaterialPreview(${material.id}, 'weight', this.value, this)">
+                    </td>
+                    <td class="table-cell text-gray-700 font-semibold">${Math.floor(totalWeightToDumpPreview).toLocaleString()}</td>
+                    <td class="table-cell text-gray-700 font-semibold">${updatedStockPreview.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="table-cell font-bold ${batchesPossibleTextColorClass}">
+                        ${batchesPossibleDisplayText}
+                    </td>
+                    <td class="table-cell">
+                        <button class="btn btn-primary commit-btn" data-id="${material.id}" onclick="commitDump(${material.id})">
+                            Commit Dump
+                        </button>
+                    </td>
+                `;
+            });
+
+            window.calculateOverallBatches(); 
+            if(batchesTakenInput) batchesTakenInput.value = batchesTaken; 
+        };
+
+        window.updateMaterialPreview = function(materialId, inputType, value, inputElement) {
+            const material = materials.find(m => m.id === materialId);
+            if (!material) return;
+
+            let processedValue = (String(value).trim() === "") ? 0 : parseFloat(value);
+            
+            if (inputType === 'bags') { 
+                if (isNaN(processedValue)) {
+                    window.showMessage(`Invalid number of bags for ${material.name}. Must be a number.`, 'error', 2000);
+                    if (inputElement) inputElement.value = material.numberOfBagsToDump;
+                    return;
+                }
+                 material.numberOfBagsToDump = processedValue; // Allow float/negative directly
+                 if (inputElement && parseFloat(inputElement.value) !== processedValue) {
+                    inputElement.value = processedValue;
+                 }
+
+            } else if (inputType === 'weight') { 
+                if (isNaN(processedValue) || processedValue < 0) { 
+                    window.showMessage(`Invalid weight per bag for ${material.name}. Must be a non-negative number.`, 'error', 2000);
+                    if (inputElement) inputElement.value = material.weightPerBagInput;
+                    return;
+                }
+                const flooredValue = Math.floor(processedValue);
+                material.weightPerBagInput = flooredValue;
+                if (inputElement && parseInt(inputElement.value) !== flooredValue) {
+                    inputElement.value = flooredValue;
+                }
+            }
+            
+            window.updateRowCalculations(materialId); 
+        };
+
+        window.updateRowCalculations = function(materialId) { 
+            const material = materials.find(m => m.id === materialId);
+            if (!material) return;
+
+            const materialIndex = materials.findIndex(m => m.id === materialId);
+            const row = tableBody.rows[materialIndex]; 
+            if (!row) return;
+            
+            const actualCurrentStock = parseFloat(material.currentStock); 
+            const materialKgPerBatchValue = parseFloat(material.kgPerBatch);
+            const materialWeightPerBagInput = parseInt(material.weightPerBagInput);
+            const materialNumberOfBagsToDump = parseFloat(material.numberOfBagsToDump); 
+
+            const totalWeightToDumpPreview = materialNumberOfBagsToDump * materialWeightPerBagInput;
+            const updatedStockPreview = actualCurrentStock + totalWeightToDumpPreview; 
+
+            let individualMaterialBatchesPossible = 0;
+            let batchesPossibleDisplayText = '0';
+            if (materialKgPerBatchValue > 0) {
+                individualMaterialBatchesPossible = Math.floor(updatedStockPreview / materialKgPerBatchValue);
+                batchesPossibleDisplayText = individualMaterialBatchesPossible.toLocaleString();
+            } else {
+                batchesPossibleDisplayText = (updatedStockPreview !== 0 && materialKgPerBatchValue === 0) ? 'N/A (0 KG/Batch)' : '0';
+            }
+
+            let rowHighlightClass = '';
+            if (materialKgPerBatchValue > 0 && individualMaterialBatchesPossible > 0 ) {
+                if (individualMaterialBatchesPossible <= 15) {
+                    rowHighlightClass = 'low-stock-alert-critical';
+                } else if (individualMaterialBatchesPossible <= 20) {
+                    rowHighlightClass = 'low-stock-alert-medium';
+                }
+            }
+            let baseRowBg = materialIndex % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+            row.className = `${rowHighlightClass || baseRowBg}`;
+
+            let batchesPossibleTextColorClass = 'text-gray-500';
+            if (materialKgPerBatchValue > 0) {
+                if (individualMaterialBatchesPossible <= 0) {
+                    batchesPossibleTextColorClass = 'text-red-600';
+                } else {
+                    batchesPossibleTextColorClass = 'text-green-600';
+                }
+            }
+
+            row.cells[6].textContent = totalWeightToDumpPreview.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            row.cells[7].textContent = updatedStockPreview.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            const batchesCell = row.cells[8];
+            batchesCell.textContent = batchesPossibleDisplayText;
+            batchesCell.className = `table-cell font-bold ${batchesPossibleTextColorClass}`; 
+
+            window.calculateOverallBatches(); 
+        };
+
+        window.calculateOverallBatches = function() {
+            let minBatchesOverall = Infinity;
+            let hasRelevantMaterial = false; 
+
+            materials.forEach(mat => {
+                const kgPerBatch = parseFloat(mat.kgPerBatch);
+                if (kgPerBatch > 0) { 
+                    hasRelevantMaterial = true;
+                    const currentStock = parseFloat(mat.currentStock);
+                    const numBags = parseFloat(mat.numberOfBagsToDump); 
+                    const weightBag = parseInt(mat.weightPerBagInput);
+                    const effectiveStockForOverallCalc = currentStock + (numBags * weightBag);
+
+                    const currentMaterialBatches = Math.floor(effectiveStockForOverallCalc / kgPerBatch);
+                    minBatchesOverall = Math.min(minBatchesOverall, currentMaterialBatches);
+                }
+            });
+
+            if (!hasRelevantMaterial) { 
+                if(overallBatchesEl) overallBatchesEl.textContent = 'N/A';
+            } else if (minBatchesOverall === Infinity) { 
+                 if(overallBatchesEl) overallBatchesEl.textContent = '0'; // Should not happen if hasRelevantMaterial
+            } else {
+                 if(overallBatchesEl) overallBatchesEl.textContent = Math.max(0, minBatchesOverall).toLocaleString();
+            }
+        };
+
+        window.setBatchesTaken = function(newBatchesValue) {
+            if (newBatchesValue < 0) {
+                window.showMessage("Batches taken cannot be negative.", 'error', 2000);
+                if(batchesTakenInput) batchesTakenInput.value = batchesTaken; 
+                return;
+            }
+            // Allow setting to current value to trigger potential save if needed, or just return
+            // if (newBatchesValue === batchesTaken) return; 
+
+            const batchDifference = newBatchesValue - batchesTaken;
+            materials.forEach(material => {
+                const kgPerBatch = parseFloat(material.kgPerBatch);
+                if (kgPerBatch > 0) {
+                    const stockConsumedOrReturned = batchDifference * kgPerBatch;
+                    material.currentStock = parseFloat(material.currentStock) - stockConsumedOrReturned; 
+                }
+            });
+
+            // const oldBatchesTaken = batchesTaken; // Not needed if we always save
+            batchesTaken = newBatchesValue;
+            if(batchesTakenInput) batchesTakenInput.value = batchesTaken;
+
+            // Always save if the value is potentially changed, even if to the same numeric value from empty input
+            window.showMessage(`Batches taken updated to ${batchesTaken}. Stock levels adjusted.`, 'info', 2000);
+            window.saveData(); 
+            window.renderTable(); 
+        };
+
+        window.updateBatchesTaken = function(change) {
+            const currentVal = parseInt(batchesTakenInput.value, 10) || 0;
+            window.setBatchesTaken(currentVal + change);
+        };
+
+        window.handleBatchesTakenInput = function(value) {
+            const newBatchesValue = parseInt(value, 10);
+            if (!isNaN(newBatchesValue)) { // Handles positive integers and 0
+                if (newBatchesValue >= 0) {
+                    window.setBatchesTaken(newBatchesValue);
+                } else { // If user types a negative number
+                    window.showMessage("Batches taken cannot be negative.", 'error', 2000);
+                    if(batchesTakenInput) batchesTakenInput.value = batchesTaken; // Revert
+                }
+            } else if (String(value).trim() === "") { 
+                window.setBatchesTaken(0); // Treat empty input as 0
+            }
+            // If NaN and not empty, do nothing, let user correct it. Previous value remains in 'batchesTaken'.
+        };
+
+
+        window.commitDump = function(materialId) {
+            const material = materials.find(m => m.id === materialId);
+            if (!material) return;
+
+            const numBags = parseFloat(material.numberOfBagsToDump); // Can be negative
+            const wtPerBag = parseInt(material.weightPerBagInput);
+
+            if (isNaN(numBags)) {
+                window.showMessage("Number of bags is not a valid number. Cannot commit.", 'error');
+                return;
+            }
+            if (numBags === 0) {
+                window.showMessage("Number of bags is zero. No stock change to commit.", 'info');
+                return;
+            }
+            if (wtPerBag <= 0) { 
+                window.showMessage("Weight per bag must be positive to commit a change.", 'error');
+                return;
+            }
+
+            const totalWeightToCommit = numBags * wtPerBag; // Can be negative
+            material.currentStock = parseFloat(material.currentStock) + totalWeightToCommit;
+            
+            const stockChangeDescription = totalWeightToCommit >= 0 ? "added to" : "removed from";
+            const absoluteWeightChange = Math.abs(totalWeightToCommit);
+
+            window.showMessage(`Commit successful: ${absoluteWeightChange.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})} KG ${stockChangeDescription} ${material.name}. Stock updated.`, 'success');
+            
+            material.numberOfBagsToDump = 0; 
+
+            window.renderTable(); 
+            window.saveData(); 
+        };
+
+        const CORRECT_USER_ID = "P@Guru"; 
+        const CORRECT_PASSWORD = "14122000"; 
+
+        window.showDownloadAuthModal = function() {
+            if(authUserIdInput) authUserIdInput.value = ''; 
+            if(authPasswordInput) authPasswordInput.value = '';
+            if(authMessageEl) authMessageEl.textContent = ''; 
+            if(downloadAuthModal) downloadAuthModal.classList.remove('hidden');
+        };
+        
+        window.toggleActualDownloadOptions = function() {
+            const optionsDiv = document.getElementById('actualDownloadOptions');
+            if (optionsDiv) {
+                optionsDiv.classList.toggle('hidden');
+            }
+        };
+
+        window.initiateDownloadWithAuth = function(format) {
+            requestedDownloadFormat = format; 
+            const optionsDiv = document.getElementById('actualDownloadOptions');
+            if (optionsDiv) {
+                optionsDiv.classList.add('hidden'); 
+            }
+            showDownloadAuthModal(); 
+        };
+
+        window.authenticateDownload = function() {
+            const enteredUserId = authUserIdInput.value.trim(); 
+            const enteredPassword = authPasswordInput.value; 
+
+            if (enteredUserId === CORRECT_USER_ID && enteredPassword === CORRECT_PASSWORD) {
+                if(downloadAuthModal) downloadAuthModal.classList.add('hidden');
+                if(authMessageEl) authMessageEl.textContent = ""; 
+
+                if (requestedDownloadFormat === 'excel') {
+                    downloadAsExcel();
+                } else if (requestedDownloadFormat === 'pdf') {
+                    downloadAsPdf();
+                }
+            } else {
+                if(authMessageEl) authMessageEl.textContent = "Invalid User ID or Password. Please try again.";
+            }
+        };
+
+        if(authPasswordInput) {
+            authPasswordInput.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    authenticateDownload();
+                }
+            });
+        }
+
+        window.formatDateForFilename = function() {
+            const now = new Date();
+            return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}-${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}`;
+        };
+
+        window.downloadAsExcel = function() {
+            if (typeof XLSX === 'undefined' || typeof saveAs === 'undefined') {
+                window.showMessage("Excel library not loaded. Cannot download.", 'error');
+                console.error("XLSX or FileSaver library not available.");
+                return;
+            }
+            window.showMessage("Preparing Excel download...", 'info', 1500);
+
+            const wb = XLSX.utils.book_new(); 
+
+            const materialHeaders = [
+                "Sr.No.", "Bin Material", "Current Stock (KG)", "KG per Batch", 
+                "No. of Bags (Input)", "Weight/Bag (KG) (Input)", "Total Dump (Preview KG)", 
+                "Updated Stock (Preview KG)", "Batches Possible (Preview)"
+            ];
+            const materialDataForExcel = materials.map(m => {
+                const currentStockVal = parseFloat(m.currentStock);
+                const kgPerBatchVal = parseFloat(m.kgPerBatch);
+                const numBags = parseFloat(m.numberOfBagsToDump); // Ensure parsing as float
+                const wtPerBag = parseInt(m.weightPerBagInput);
+
+                const totalWeightToDumpPreview = numBags * wtPerBag;
+                const updatedStockPreview = currentStockVal + totalWeightToDumpPreview;
+                
+                let batchesPossibleDisplay;
+                if (kgPerBatchVal > 0) {
+                    const batches = Math.floor(updatedStockPreview / kgPerBatchVal);
+                    batchesPossibleDisplay = batches; // Keep as number for Excel
+                } else {
+                    batchesPossibleDisplay = (updatedStockPreview !== 0 && kgPerBatchVal === 0) ? 'N/A' : 0;
+                }
+
+                return [
+                    m.id,
+                    m.name,
+                    currentStockVal.toFixed(2), 
+                    kgPerBatchVal.toFixed(2),
+                    numBags.toFixed(2), // Display with decimals if any
+                    wtPerBag,
+                    totalWeightToDumpPreview.toFixed(2),
+                    updatedStockPreview.toFixed(2),
+                    batchesPossibleDisplay.toString() // Convert to string for consistency if N/A
+                ];
+            });
+            const ws_materials = XLSX.utils.aoa_to_sheet([materialHeaders, ...materialDataForExcel]);
+            XLSX.utils.book_append_sheet(wb, ws_materials, "Material Data");
+
+            const summaryHeaders = ["Summary Item", "Value"];
+            const summaryData = [
+                ["Batches Taken", batchesTaken],
+                ["Overall Batches Possible (Limiting Material)", overallBatchesEl ? overallBatchesEl.textContent : 'N/A']
+            ];
+            const ws_summary = XLSX.utils.aoa_to_sheet([summaryHeaders, ...summaryData]);
+            XLSX.utils.book_append_sheet(wb, ws_summary, "Summary");
+
+            const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            const filename = `BinDashboard_Data_${window.formatDateForFilename()}.xlsx`;
+            saveAs(new Blob([wbout], { type: 'application/octet-stream' }), filename);
+            window.showMessage("Excel download complete!", 'success');
+        };
+
+        window.downloadAsPdf = function() {
+            if (typeof jspdf === 'undefined' || typeof jspdf.jsPDF === 'undefined' || (typeof jsPDF !== 'undefined' && typeof jsPDF.autoTable === 'undefined') ) { // Check for jsPDF global too
+                 window.showMessage("PDF library not loaded. Cannot download.", 'error');
+                 console.error("jsPDF or jsPDF-AutoTable library not available.");
+                 return;
+            }
+            window.showMessage("Preparing PDF download...", 'info', 1500);
+
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF({ orientation: 'landscape' }); 
+
+            doc.setFontSize(16);
+            doc.text("Bin Feeding Material Dashboard Data", 14, 20);
+            doc.setFontSize(10);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+            let userInfoForPdf = "N/A (Offline)";
+            if (window.userId && window.app && window.app.options.projectId) { // Check if app is initialized
+                userInfoForPdf = window.userId + (window.auth && window.auth.currentUser && window.auth.currentUser.isAnonymous ? " (Anonymous)" : "");
+            }
+            doc.text(`User ID: ${userInfoForPdf}`, 14, 34);
+
+
+            doc.setFontSize(12);
+            doc.text(`Batches Taken: ${batchesTaken}`, 14, 45);
+            doc.text(`Overall Batches Possible (based on limiting material): ${overallBatchesEl ? overallBatchesEl.textContent : 'N/A'}`, 14, 52);
+
+            const materialTableHeaders = [ 
+                "ID", "Material", "Current Stock (KG)", "KG/Batch", 
+                "Bags (In)", "Wt/Bag (In)", "Dump (Prev KG)", 
+                "Upd. Stock (Prev KG)", "Batches (Prev)"
+            ];
+            const materialRowsForPdf = materials.map(m => {
+                const currentStockVal = parseFloat(m.currentStock);
+                const kgPerBatchVal = parseFloat(m.kgPerBatch);
+                const numBags = parseFloat(m.numberOfBagsToDump); // Ensure parsing as float
+                const wtPerBag = parseInt(m.weightPerBagInput);
+
+                const totalWeightToDumpPreview = numBags * wtPerBag;
+                const updatedStockPreview = currentStockVal + totalWeightToDumpPreview;
+                
+                let batchesPossibleDisplay;
+                 if (kgPerBatchVal > 0) {
+                    const batches = Math.floor(updatedStockPreview / kgPerBatchVal);
+                    batchesPossibleDisplay = batches.toLocaleString();
+                } else {
+                    batchesPossibleDisplay = (updatedStockPreview !== 0 && kgPerBatchVal === 0) ? 'N/A' : '0';
+                }
+                
+                return [
+                    m.id,
+                    m.name,
+                    currentStockVal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+                    kgPerBatchVal.toFixed(2),
+                    numBags.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}), // Display with decimals
+                    wtPerBag.toLocaleString(),
+                    totalWeightToDumpPreview.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+                    updatedStockPreview.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+                    batchesPossibleDisplay
+                ];
+            });
+
+            doc.autoTable({
+                startY: 60, 
+                head: [materialTableHeaders],
+                body: materialRowsForPdf,
+                theme: 'striped', 
+                headStyles: { fillColor: [30, 144, 255] }, 
+                styles: { fontSize: 7, cellPadding: 1.5, overflow: 'linebreak' },
+                columnStyles: {
+                    0: { cellWidth: 10 }, 
+                    1: { cellWidth: 35 }, 
+                },
+                didDrawPage: function (data) { 
+                    doc.setFontSize(8);
+                    doc.text('Page ' + doc.internal.getNumberOfPages(), data.settings.margin.left, doc.internal.pageSize.height - 10);
+                }
+            });
+
+            const filename = `BinDashboard_Data_${window.formatDateForFilename()}.pdf`;
+            doc.save(filename); 
+            window.showMessage("PDF download complete!", 'success');
+        };
+
+        window.handleFileUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (typeof XLSX === 'undefined') {
+                window.showMessage("Excel library (XLSX) not loaded. Cannot process file.", 'error');
+                console.error("XLSX library not available for file upload.");
+                if(event.target) event.target.value = null; 
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                try {
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    if (!firstSheetName) {
+                        window.showMessage("Excel file seems empty or has no sheets.", 'error');
+                        return;
+                    }
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet); 
+                    updateDashboardFromExcelData(jsonData);
+                } catch (error) {
+                    console.error("Error processing Excel file:", error);
+                    window.showMessage(`Error processing Excel file: ${error.message}`, 'error', 5000);
+                } finally {
+                     if(event.target) event.target.value = null; 
+                }
+            };
+            reader.onerror = function() {
+                window.showMessage("Error reading the Excel file.", 'error');
+                 if(event.target) event.target.value = null;
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        window.updateDashboardFromExcelData = function(excelData) {
+            if (!excelData || excelData.length === 0) {
+                window.showMessage("No data found in Excel sheet or sheet is empty. Ensure the first sheet has data with correct headers.", 'warning', 4000);
+                return;
+            }
+
+            const nameHeader = "Bin Material";
+            const currentStockHeader = "Current Stock (KG)";
+            const kgPerBatchHeader = "KG per Batch";
+
+            let updatedCount = 0;
+            let notFoundCount = 0;
+            let invalidDataCount = 0;
+
+            excelData.forEach(row => {
+                const materialNameFromFile = row[nameHeader] ? String(row[nameHeader]).trim() : null;
+                
+                if (!materialNameFromFile) { 
+                    console.warn("Skipping row from Excel due to missing 'Bin Material' name.");
+                    return; 
+                }
+
+                const material = materials.find(m => m.name.toLowerCase() === materialNameFromFile.toLowerCase());
+
+                if (material) {
+                    let materialUpdatedThisRow = false;
+                    if (row.hasOwnProperty(currentStockHeader)) { 
+                        const newStock = parseFloat(row[currentStockHeader]);
+                        if (!isNaN(newStock)) { 
+                            material.currentStock = newStock;
+                            materialUpdatedThisRow = true;
+                        } else {
+                            console.warn(`Invalid Current Stock value for ${materialNameFromFile}: '${row[currentStockHeader]}'. Skipped.`);
+                            invalidDataCount++;
+                        }
+                    }
+
+                    if (row.hasOwnProperty(kgPerBatchHeader)) {
+                        const newKgPerBatch = parseFloat(row[kgPerBatchHeader]);
+                        if (!isNaN(newKgPerBatch) && newKgPerBatch >= 0) { 
+                            material.kgPerBatch = newKgPerBatch;
+                            materialUpdatedThisRow = true;
+                        } else {
+                            console.warn(`Invalid KG per Batch value for ${materialNameFromFile}: '${row[kgPerBatchHeader]}'. Must be non-negative. Skipped.`);
+                            invalidDataCount++;
+                        }
+                    }
+                    if(materialUpdatedThisRow) updatedCount++;
+                } else {
+                    console.warn(`Material "${materialNameFromFile}" from Excel not found in dashboard data. Check names.`);
+                    notFoundCount++;
+                }
+            });
+
+            let messageToShow = "";
+            let messageType = "info";
+
+            if (updatedCount > 0) {
+                messageToShow = `${updatedCount} material(s) updated from Excel. `;
+                messageType = 'success';
+            }
+            if (notFoundCount > 0) {
+                messageToShow += `${notFoundCount} material(s) from Excel not found in dashboard. `;
+                messageType = (messageType === 'success' || messageType === 'info') ? 'warning' : 'warning'; 
+            }
+            if (invalidDataCount > 0) {
+                 messageToShow += `${invalidDataCount} entry/entries with invalid data (stock/kg per batch) skipped. `;
+                 messageType = 'warning';
+            }
+
+            if (updatedCount > 0) { 
+                window.renderTable(); 
+                window.calculateOverallBatches(); 
+                window.saveData(); 
+            }
+            
+            if (messageToShow === "") { 
+                 window.showMessage("No changes applied from Excel. Ensure headers ('Bin Material', 'Current Stock (KG)', 'KG per Batch') and material names match, and data is valid.", 'info', 6000);
+            } else {
+                window.showMessage(messageToShow, messageType, 6000);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure Firebase initialization script runs first and window.app etc. are available.
+            // The auth logic in the first script block will call loadData/renderTable.
+            // This DOMContentLoaded might be redundant for renderTable if Firebase init is successful.
+            // However, it's a fallback if Firebase init fails early.
+            if (typeof window.renderTable !== 'function') {
+                console.error("renderTable is not defined globally by the time DOMContentLoaded fires in the second script module.");
+            } else if (!window.app) { // If Firebase app hasn't been initialized (e.g., due to error in first script)
+                 console.log("DOM Content Loaded (app logic): Firebase not configured or init failed. Rendering with local/default data.");
+                 window.renderTable();
+            }
+
+
+            if (saveDataBtn) { 
+                 saveDataBtn.addEventListener('click', window.saveData);
+            }
+            if (uploadExcelInput) {
+                uploadExcelInput.addEventListener('change', window.handleFileUpload);
+            }
+        });
+        
+        document.addEventListener('click', function(event) {
+            const showChoicesBtn = document.getElementById('showDownloadChoicesBtn');
+            const actualOptionsDiv = document.getElementById('actualDownloadOptions');
+            const authModalContent = downloadAuthModal ? downloadAuthModal.querySelector('.modal-content') : null;
+
+            const isClickInsideShowChoicesBtn = showChoicesBtn && showChoicesBtn.contains(event.target);
+            const isClickInsideActualOptions = actualOptionsDiv && actualOptionsDiv.contains(event.target);
+            if (!isClickInsideShowChoicesBtn && !isClickInsideActualOptions && actualOptionsDiv && !actualOptionsDiv.classList.contains('hidden')) {
+                actualOptionsDiv.classList.add('hidden');
+            }
+
+            if (downloadAuthModal && !downloadAuthModal.classList.contains('hidden')) {
+                const isClickInsideAuthModalContent = authModalContent && authModalContent.contains(event.target);
+                if (!isClickInsideAuthModalContent && event.target === downloadAuthModal) {
+                    downloadAuthModal.classList.add('hidden');
+                    requestedDownloadFormat = null; 
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
